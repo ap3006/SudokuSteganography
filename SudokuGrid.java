@@ -1,6 +1,11 @@
+/*
+ * @author: Ashutosh Patra
+ * version: 1.0
+ */
+
 import java.lang.*;
 
-//Code to randomly generate a Complete sudoku grid.
+//Code to randomly generate a complete sudoku grid.
 public class SudokuGrid {
 
     int[] grid[];
