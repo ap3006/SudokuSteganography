@@ -134,6 +134,10 @@ public class SudokuGrid {
       }
     }
 
+    public int[][] returnGrid(){
+      return grid;
+    }
+
     public static void main(String args[]){
       SudokuGrid sudoku = new SudokuGrid();
       sudoku.fillGrid();
