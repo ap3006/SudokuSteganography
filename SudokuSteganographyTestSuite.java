@@ -9,10 +9,7 @@ import java.lang.Math;
 public class SudokuSteganographyTestSuite  {
 
   public static void main(String[] args){
-      SudokuGrid grid = new SudokuGrid();
-      grid.fillGrid();
-      grid.subtractOne();
-      int[][] sudokuGrid = grid.returnGrid();
+
 
       // int[][] sudokuGrid = {{1, 8, 4, 0, 2, 5, 3, 6, 7},
       // {6, 5, 0, 3, 1, 7, 2, 8, 4},
@@ -41,6 +38,55 @@ public class SudokuSteganographyTestSuite  {
       // int secondPixel = 20;
       // int si = 4;
 
+      // int[][] sudokuGrid = {{8, 5, 2, 3, 0, 1, 4, 6, 7 },
+      // {0, 6, 1, 4, 7, 5, 3, 8, 2 },
+      // {4, 7, 3, 6, 2, 8, 0, 1, 5 },
+      // {1, 2, 4, 0, 8, 7, 5, 3, 6 },
+      // {6, 8, 5, 1, 3, 2, 7, 0, 4 },
+      // {7, 3, 0, 5, 6, 4, 8, 2, 1 },
+      // {3, 1, 6, 7, 4, 0, 2, 5, 8 },
+      // {5, 4, 8, 2, 1, 3, 6, 7, 0 },
+      // {2, 0, 7, 8, 5, 6, 1, 4, 3 }};
+      //
+      // int firstPixel = 157;
+      // int secondPixel = 166;
+      //
+      // int si = 5;
+
+      // int[][] sudokuGrid = {{3, 2, 7, 0, 1, 4, 5, 8, 6 },
+      // {5, 1, 6, 3, 8, 7, 0, 2, 4 },
+      // {8, 4, 0, 5, 2, 6, 1, 3, 7 },
+      // {1, 5, 2, 8, 6, 0, 4, 7, 3 },
+      // {4, 7, 3, 2, 5, 1, 6, 0, 8 },
+      // {0, 6, 8, 4, 7, 3, 2, 5, 1 },
+      // {7, 8, 5, 1, 4, 2, 3, 6, 0 },
+      // {6, 0, 4, 7, 3, 5, 8, 1, 2 },
+      // {2, 3, 1, 6, 0, 8, 7, 4, 5 }};
+      //
+      // int firstPixel = 22;
+      // int secondPixel = 125;
+      //
+      // int si = 7;
+
+      // int[][] sudokuGrid = {{0, 5, 4, 1, 3, 2, 6, 8, 7 },
+      // {8, 1, 2, 6, 0, 7, 3, 5, 4 },
+      // {7, 3, 6, 4, 5, 8, 0, 1, 2 },
+      // {2, 0, 8, 5, 7, 1, 4, 3, 6 },
+      // {1, 4, 7, 3, 6, 0, 8, 2, 5 },
+      // {3, 6, 5, 8, 2, 4, 1, 7, 0 },
+      // {5, 8, 1, 7, 4, 6, 2, 0, 3 },
+      // {6, 2, 3, 0, 1, 5, 7, 4, 8 },
+      // {4, 7, 0, 2, 8, 3, 5, 6, 1 }};
+      //
+      // int firstPixel = 89;
+      // int secondPixel = 161;
+      // int si = 2;
+
+      SudokuGrid grid = new SudokuGrid();
+      grid.fillGrid();
+      grid.subtractOne();
+      int[][] sudokuGrid = grid.returnGrid();
+
       Random rand = new Random();
       int firstPixel = rand.nextInt(256);
       int secondPixel = rand.nextInt(256);
@@ -49,9 +95,6 @@ public class SudokuSteganographyTestSuite  {
       PixelPair first = new PixelPair(firstPixel,secondPixel);
       int pix =  first.getX() % 9;
       int piy = first.getY() % 9;
-
-
-
 
       System.out.println("Sudoku Grid: ");
       // grid.printGrid();
@@ -140,6 +183,9 @@ public class SudokuSteganographyTestSuite  {
         SQD = (Math.abs(SQX) + Math.abs(SQY));
         break;
       }
+      if (i == CEB.length - 1){
+        SQD = Integer.MAX_VALUE;
+      }
     }
 
     System.out.println("Value of DH: " + DH + "\n");
@@ -148,7 +194,7 @@ public class SudokuSteganographyTestSuite  {
     System.out.println("Value of SQY: " + SQY + "\n");
     System.out.println("Value of SQD: " + SQD + "\n");
 
-
+    // SQD = 50;
     if (Math.abs(DH) <= Math.abs(DV) && Math.abs(DH) <= Math.abs(SQD)){
       //firstPixel += DH;
       first.setX(first.getX() + DH);
