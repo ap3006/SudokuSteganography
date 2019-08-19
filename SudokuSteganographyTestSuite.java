@@ -1,3 +1,8 @@
+/*
+ *@author Ashutosh Patra
+ *@version 1.0
+ */
+
 import java.util.*;
 import java.lang.Math;
 
@@ -8,7 +13,6 @@ public class SudokuSteganographyTestSuite  {
       grid.fillGrid();
       grid.subtractOne();
       int[][] sudokuGrid = grid.returnGrid();
-      //grid.printGrid();
 
       // int[][] sudokuGrid = {{1, 8, 4, 0, 2, 5, 3, 6, 7},
       // {6, 5, 0, 3, 1, 7, 2, 8, 4},
@@ -19,26 +23,39 @@ public class SudokuSteganographyTestSuite  {
       // {8, 1, 2, 7, 3, 0, 6, 4, 5},
       // {0, 3, 6, 5, 4, 1, 8, 7, 2},
       // {7, 4, 5, 2, 8, 6, 1, 3, 0 }};
-
-      Random rand = new Random();
-
-      int firstPixel = rand.nextInt(256);
-      int secondPixel = rand.nextInt(256);
-
       // int firstPixel = 128;
       // int secondPixel = 149;
       // int si = 4;
+
+      // int[][] sudokuGrid = {{4, 8, 2, 0, 3, 1, 5, 6, 7},
+      // {3, 5, 0, 6, 7, 2, 4, 1, 8 },
+      // {1, 7, 6, 4, 5, 8, 0, 3, 2 },
+      // {5, 1, 4, 3, 0, 7, 2, 8, 6 },
+      // {0, 2, 3, 8, 4, 6, 7, 5, 1 },
+      // {7, 6, 8, 2, 1, 5, 3, 0, 4 },
+      // {2, 0, 1, 7, 8, 3, 6, 4, 5 },
+      // {8, 3, 7, 5, 6, 4, 1, 2, 0 },
+      // {6, 4, 5, 1, 2, 0, 8, 7, 3 }};
+      //
+      // int firstPixel = 128;
+      // int secondPixel = 20;
+      // int si = 4;
+
+      Random rand = new Random();
+      int firstPixel = rand.nextInt(256);
+      int secondPixel = rand.nextInt(256);
+      int si = rand.nextInt(9);
 
       PixelPair first = new PixelPair(firstPixel,secondPixel);
       int pix =  first.getX() % 9;
       int piy = first.getY() % 9;
 
-      int si = rand.nextInt(9);
+
 
 
       System.out.println("Sudoku Grid: ");
-      grid.printGrid();
-      // System.out.println(Arrays.deepToString(sudokuGrid));
+      // grid.printGrid();
+      printGrid(sudokuGrid);
       System.out.println("");
       System.out.println("Pixel pair is: " + first.toString());
       System.out.println("The value of pix is " + pix + " and piy is " + piy);
@@ -74,6 +91,7 @@ public class SudokuSteganographyTestSuite  {
 
     int py = (int) (piy / 3);
     posy = (py * 3) % 3;
+
     for (int i = 0; i < 3; i++){
       pix = first.getX() % 9;
       int px = (int) (pix / 3);
@@ -81,8 +99,10 @@ public class SudokuSteganographyTestSuite  {
 
       for (int j = 0; j < 3; j++){
         CEB[posy][posx] = sudokuGrid[piy][pix];
+        // CEB[posy][posx] = 1;
+        // System.out.println("The value of pix is: " + pix + " The value of piy is: " + piy + " and value in matrix is " + sudokuGrid[pix][piy]);
+        // System.out.println("(Posx,Posy): " + "(" + posx + ", " + posy + ")");
         posx++;
-        // System.out.println("The value of pix is: " + pix + " The value of piy is: " + piy);
         pix = (pix+1) % 9;
 
       }
@@ -110,10 +130,13 @@ public class SudokuSteganographyTestSuite  {
     int SQX = 0;
     int SQY = 0;
     int SQD = 0;
-    for (int i = 0; i < sudokuGrid.length; i++){
-      if (linearSearch(sudokuGrid[i],si) != -1){
-        SQX = linearSearch(sudokuGrid[i], si) + firstX - (pix % 3);
+    for (int i = 0; i < CEB.length; i++){
+      if (linearSearch(CEB[i],si) != -1){
+        SQX = linearSearch(CEB[i], si) + firstX - (pix % 3);
         SQY = i + firstY - (piy%3);
+        System.out.println(Arrays.toString(CEB[i]));
+        System.out.println("(Posx,Posy): " + "(" + (linearSearch(sudokuGrid[i], si) + firstX) + ", " + (i + firstY) + ")");
+        System.out.println(linearSearch(CEB[i], si));
         SQD = (Math.abs(SQX) + Math.abs(SQY));
         break;
       }
@@ -188,6 +211,16 @@ public class SudokuSteganographyTestSuite  {
       }
     }
     return -1;
+  }
+
+  public static void printGrid(int[][] grid){
+      for (int i = 0; i<9; i++)
+      {
+          for (int j = 0; j<9; j++)
+              System.out.print(grid[i][j] + " ");
+          System.out.println();
+      }
+      System.out.println();
   }
 
 }
