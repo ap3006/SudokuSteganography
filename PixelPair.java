@@ -9,11 +9,24 @@ public class PixelPair{
     this.y = y;
   }
 
-  public int returnX(){
+  public int getX(){
     return this.x;
   }
 
-  public int returnY(){
+  public int getY(){
     return this.y;
   }
+
+  public void setX(int value){
+    this.x = value;
+  }
+
+  public void setY(int value){
+    this.y = value;
+  }
+
+  public String toString(){
+    return "(" + this.x + ", " + this.y + ")";
+  }
+
 }
