@@ -82,6 +82,19 @@ public class SudokuGrid {
         System.out.println();
     }
 
+    public byte[] returnOneDimension(){
+      byte[] output = new byte[81];
+      int count = 0;
+      for (int i = 0; i < 9; i++){
+        for (int j = 0; j < 9; j++){
+
+          output[count++] = (byte) this.grid[i][j];
+
+        }
+      }
+      return output;
+    }
+
     public boolean fillRemaining(int i, int j){
         if (j>=9 && i<9-1)
         {

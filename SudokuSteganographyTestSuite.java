@@ -82,6 +82,9 @@ public class SudokuSteganographyTestSuite  {
       // int secondPixel = 161;
       // int si = 2;
 
+
+      ////////////////////////////////////////////////////////////
+
       SudokuGrid grid = new SudokuGrid();
       grid.fillGrid();
       grid.subtractOne();
@@ -246,6 +249,19 @@ public class SudokuSteganographyTestSuite  {
     si = sudokuGrid[piy][pix];
 
     System.out.println("Si: " + si);
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+
+    // int i = 54;
+    // byte byte3 = (byte)((i & 0xFF000000) >>> 24); //0
+    // byte byte2 = (byte)((i & 0x00FF0000) >>> 16); //0
+    // byte byte1 = (byte)((i & 0x0000FF00) >>> 8 ); //0
+    // byte byte0 = (byte)((i & 0x000000FF)	   );
+    // System.out.println(byte3);
+    // System.out.println(byte2);
+    // System.out.println(byte1);
+    // System.out.println(byte0);
 
   }
 

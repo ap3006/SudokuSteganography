@@ -41,8 +41,6 @@ public class ZipFileTest {
 				bits += convertToBin(originalContentBytes[i]);
 			}
 
-			System.out.println((originalContentBytes.length * 8) % 3);
-
 			int bitCount = (originalContentBytes.length * 8) % 3;
 			int zeroOffset = bitCount == 0 ? 0 : 3 - bitCount;
 
@@ -50,7 +48,18 @@ public class ZipFileTest {
 				bits += "0";
 			}
 
-			System.out.println(bits);
+			int[] Sk = new int[bits.length() / 3];
+
+			int counter = 0;
+			for (int i = 0; i < Sk.length; i++){
+				Sk[i] += Integer.parseInt(bits.charAt(counter++) + "") * 4;
+				Sk[i] += Integer.parseInt(bits.charAt(counter++) + "") * 2;
+				Sk[i] += Integer.parseInt(bits.charAt(counter++) + "") * 1;
+			}
+
+			System.out.println(Arrays.toString(Sk));
+
+			// System.out.println(bits);
 
 			// ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(originalContentBytes));
 			// ZipEntry entry = null;
