@@ -1,7 +1,7 @@
-/*
- *@author Ashutosh Patra
- *@version 1.0
- */
+// /*
+//  *@author Ashutosh Patra
+//  *@version 1.0
+//  */
 
 import java.io.File;
 
@@ -23,19 +23,19 @@ public class SudokuSteganography{
 
   }
 
-  public static void main(String[] args){
-
-    SudokuSteganography model = new SudokuSteganography();
-    if (model.encode("testFiles","googleLogo","png","output","Hello World!")){
-      System.out.println("Success");
-    }
-    else{
-      System.out.println("Fail");
-    }
-
-    System.out.println(model.decode("testFiles","output"));
-
-  }
+  // public static void main(String[] args){
+  //
+  //   Test model = new Test();
+  //   if (model.encode("testFiles","googleLogo","png","output","Hello World this is me, ya boi Tosh asoidasdjasiodj!")){
+  //     System.out.println("Success");
+  //   }
+  //   else{
+  //     System.out.println("Fail");
+  //   }
+  //
+  //   System.out.println(model.decode("testFiles","output"));
+  //
+  // }
 
   public boolean encode(String path, String original, String ext1, String stegan, String message)
   {
@@ -62,15 +62,15 @@ public class SudokuSteganography{
     {
       //user space is necessary for decrypting
       BufferedImage image  = user_space(getImage(image_path(path,name,"png")));
-      decode = decode_text(get_byte_data(image));
-      System.out.println("decode over");
-      System.out.println(Arrays.toString(decode));
+      decode = decode_text(image);
+      // decode = decode_text(get_byte_data(image));
+      // System.out.println("decode over");
       return(new String(decode));
     }
     catch(Exception e)
     {
-      System.out.println("I am here");
-      System.out.println(e.toString());
+      // System.out.println("I am here");
+      // System.out.println(e.toString());
       // System.out.println()
       JOptionPane.showMessageDialog(null,
         "There is no hidden message in this image!","Error",
@@ -146,10 +146,10 @@ public class SudokuSteganography{
   private BufferedImage add_text(BufferedImage image, String text)
   {
     //convert all items to byte arrays: image, message, message length
-    byte img[] = get_byte_data(image);
+    // byte img[] = get_byte_data(image);
     byte msg[] = text.getBytes();
     byte len[] = bit_conversion(msg.length);
-    System.out.println(Arrays.toString(msg));
+    BufferedImage picture = image;
     try
     {
       SudokuGrid grid = new SudokuGrid();
@@ -157,18 +157,33 @@ public class SudokuSteganography{
       grid.subtractOne();
       grid.printGrid();
       int[][] sudokuGrid = grid.returnGrid();
+      // int[][] sudokuGrid = {{2, 8, 4, 3, 0, 1, 5, 7, 6},
+      //                       {3, 5, 7, 4, 2, 6, 0, 8, 1},
+      //                       {0, 6, 1, 5, 8, 7, 2, 4, 3},
+      //                       {1, 4, 8, 2, 7, 5, 6, 3, 0},
+      //                       {6, 0, 2, 1, 3, 8, 4, 5, 7},
+      //                       {5, 7, 3, 0, 6, 4, 8, 1, 2},
+      //                       {7, 1, 6, 8, 4, 0, 3, 2, 5},
+      //                       {8, 2, 0, 7, 5, 3, 1, 6, 4},
+      //                       {4, 3, 5, 6, 1, 2, 7, 0, 8}};
+      int[] RGBimg = imageToRGB(image);
+      int[] alpha = getAlpha(image);
 
-      int[] RGBimg = imageToRGB(img);
-      int[] alpha = getAlpha(img);
+      // int height = ;
+      // int weight = ;
 
-      sudokuEncoding(img, msg, sudokuGrid);
-      encode_text(img, len,  0); //0 first positiong
-      encode_text(img, grid.returnOneDimension(), 32); //4 bytes of space for length: 4bytes*8bit = 32 bits
+      byte img[] = get_byte_data(picture);
+      // System.out.println(Arrays.toString(img));
+      // encode_text(img, len,  0); //0 first positiong
+      // sudokuEncoding(picture, msg, sudokuGrid);
+      encode_text(img, returnOneDimension(sudokuGrid), (img.length) - (81*8)); //4 bytes of space for length: 4bytes*8bit = 32 bits
+      lengthEncoding(picture, msg, sudokuGrid);
+      messageEncoding(picture, msg, sudokuGrid);
 
     }
     catch(Exception e)
     {
-      System.out.println(e.toString());
+      // System.out.println(e.toString());
       JOptionPane.showMessageDialog(null,
       "Target File cannot hold message!", "Error",JOptionPane.ERROR_MESSAGE);
     }
@@ -259,54 +274,190 @@ public class SudokuSteganography{
     return image;
   }
 
-  private byte[] sudokuEncoding(byte[] image, byte[] addition, int[][] sudokuGrid){
+  private BufferedImage lengthEncoding(BufferedImage img, byte[] addition, int[][] sudokuGrid){
 
+    int height = img.getHeight();
+    int width = img.getWidth();
+    byte[] image = get_byte_data(img);
+    String bits = "";
 
+    // String lengthBits = convertToBin(addition.length);
+    for (int i = 0; i < 45-8; i++ ){
+      bits += "0";
+    }
+    bits += convertToBin(addition.length);
+    // System.out.println(addition.length);
+    // System.out.println(bits);
+
+    int[] Sk = new int[15];
+    int bitCounter = 0;
+    for (int i = 0; i < Sk.length; i++){
+      // System.out.println(i);
+      Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 4;
+      Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 2;
+      Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 1;
+    }
+
+    // System.out.println(Arrays.toString(Sk));
+    // System.out.println(Arrays.toString(addition));
+
+    int[] RGB = imageToRGB(img);
+    if (bits.length() > RGB.length * 4.5){
+      // System.out.println("Exception is thrown");
+      throw new IllegalArgumentException("File not long enough!");
+    }
+
+    int RgbCounter = 0;
+    for (int j = 0; j < Sk.length; j++){
+      // System.out.println(j);
+      // System.out.println(j);
+      PixelPair first = new PixelPair(RGB[RgbCounter], RGB[RgbCounter + 1]);
+
+      int pix = first.getX() % 9;
+      int piy = first.getY() % 9;
+
+      int si = Sk[j];
+
+      int[] CEH = new int[9];
+      int[] CEV = new int[9];
+      int[][] CEB = new int[3][3];
+
+      for (int i = 0; i < 9; i++){
+        int pos = (i+4) % 9;
+        CEH[pos] = sudokuGrid[piy][pix];
+        pix = (pix+1) % 9;
+      }
+
+      for (int i = 0; i < 9; i++){
+        int pos = (i+4) % 9;
+        CEV[pos] = sudokuGrid[piy][pix];
+        piy = (piy+1) % 9;
+      }
+
+      int posx = 0;
+      int posy = 0;
+
+      piy = first.getY() % 9;
+
+      int firstX = first.getX() % 9;
+      int firstY = first.getY() % 9;
+
+      int py = (int) (piy / 3);
+      posy = (py * 3) % 3;
+
+      for (int i = 0; i < 3; i++){
+        pix = first.getX() % 9;
+        int px = (int) (pix / 3);
+        posx = (px * 3) % 3;
+
+        for (int k = 0; k < 3; k++){
+          CEB[posy][posx] = sudokuGrid[piy][pix];
+          posx++;
+          pix = (pix+1) % 9;
+
+        }
+        posy++;
+        piy = (piy+1) % 9;
+      }
+
+      int DH = linearSearch(CEH, si) - 4;
+      int DV = linearSearch(CEV, si) - 4;
+
+      int SQX = 0;
+      int SQY = 0;
+      int SQD = 0;
+      for (int i = 0; i < CEB.length; i++){
+        if (linearSearch(CEB[i],si) != -1){
+          SQX = linearSearch(CEB[i], si) + firstX - (pix % 3);
+          SQY = i + firstY - (piy%3);
+          SQD = (Math.abs(SQX) + Math.abs(SQY));
+          break;
+        }
+        if (i == CEB.length - 1){
+          SQD = Integer.MAX_VALUE;
+        }
+      }
+
+      if (Math.abs(DH) <= Math.abs(DV) && Math.abs(DH) <= Math.abs(SQD)){
+        first.setX(first.getX() + DH);
+      }
+      else if (Math.abs(DV) <= Math.abs(DH) && Math.abs(DV) <= Math.abs(SQD)){
+        first.setY(first.getY() + DV);
+      }
+      else{
+        first.setX(first.getX() + SQX);
+        first.setY(first.getY() + SQY);
+      }
+
+      // System.out.println(first.toString());
+
+      if (first.getX() < 0 || first.getX() > 255){
+        if (first.getX() < 0){
+          first.setX(first.getX() + 9);
+        }
+        else{
+          first.setX(first.getX() - 9);
+        }
+      }
+
+      if (first.getY() < 0 || first.getY() > 255){
+        if (first.getY() < 0){
+          first.setY(first.getY() + 9);
+        }
+        else{
+          first.setY(first.getY() - 9);
+        }
+      }
+
+      RGB[RgbCounter] = first.getX();
+      RGB[RgbCounter+1] = first.getY();
+
+      RgbCounter += 2;
+    }
+
+    // System.out.println("Embedding over");
+
+    return RGBtoImage(img, height, width,RGB, getAlpha(img));
+
+  }
+
+  private BufferedImage messageEncoding(BufferedImage img, byte[] addition, int[][] sudokuGrid){
+
+    int height = img.getHeight();
+    int width = img.getWidth();
+    byte[] image = get_byte_data(img);
     String bits = "";
     for (int i = 0; i < addition.length; i++ ){
       bits += convertToBin(addition[i]);
     }
 
+    // System.out.println("Length of string is: " + bits.length());
+    // System.out.println("The length of the message is: " + addition.length);
+
     int bitCount = (addition.length * 8) % 3;
     int zeroOffset = bitCount == 0 ? 0 : 3 - bitCount;
-
     for (int i = 1; i <= zeroOffset; i++){
       bits += "0";
     }
 
-    System.out.println(bits);
     int[] Sk = new int[bits.length() / 3];
-    System.out.println("Sk");
-    System.out.println(Arrays.toString(Sk));
     int bitCounter = 0;
     for (int i = 0; i < Sk.length; i++){
       Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 4;
       Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 2;
       Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 1;
     }
+
     // System.out.println(Arrays.toString(Sk));
+    // System.out.println(Arrays.toString(addition));
 
-    // int overflow = result.length() - (length * 8);
-    //
-    // result = result.substring(0, result.length() - overflow);
-    //
-    // byte[] output = new byte[length];
-    // counter = 0;
-    // for (int i = 0; i < length; i++){
-    //   output[i] = Byte.parseByte(result.substring(counter, counter + 8));
-    //   counter += 8;
-    // }
-
-    int[] RGB = imageToRGB(image);
+    int[] RGB = imageToRGB(img);
     if (bits.length() > RGB.length * 4.5){
-      System.out.println("Exception is thrown");
+      // System.out.println("Exception is thrown");
       throw new IllegalArgumentException("File not long enough!");
     }
 
-    // System.out.println("I am here");
-    // System.out.println(Arrays.toString(RGB));
-    // System.out.println(Sk.length);
-    int RgbCounter = 0;
+    int RgbCounter = 30;
     for (int j = 0; j < Sk.length; j++){
       // System.out.println(j);
       PixelPair first = new PixelPair(RGB[RgbCounter], RGB[RgbCounter + 1]);
@@ -415,55 +566,75 @@ public class SudokuSteganography{
 
     // System.out.println("Embedding over");
 
-    return RGBtoImage(RGB, getAlpha(image));
+    return RGBtoImage(img, height, width,RGB, getAlpha(img));
 
   }
 
-  private int[] imageToRGB(byte[] image){
-    int[] imageRGB = new int[image.length * 3];
+  private int[] imageToRGB(BufferedImage image){
+    // int[] imageRGB = new int[image.length * 3];
+    int height = image.getHeight();
+    int width = image.getWidth();
+
+    int[] imageRGB = new int[height*width * 3];
 
     int counter = 0;
-    for (int i = 0; i < image.length; i++){
-      // System.out.println((byte) ((image[i] >> 16) & 0xff));
-      imageRGB[counter++] =  ((image[i] >> 16) & 0xff);
-      imageRGB[counter++] =  ((image[i] >> 8) & 0xff);
-      imageRGB[counter++] =  ((image[i]) & 0xff);
+    for (int i = 0; i < height; i++){
+      for (int j = 0; j < width; j++){
+        int pixel = image.getRGB(j,i);
+        imageRGB[counter++] = (pixel >> 16) & 0xff;
+        imageRGB[counter++] = (pixel >> 8) & 0xff;
+        imageRGB[counter++] = (pixel & 0xff);
+      }
     }
 
     return imageRGB;
 
   }
 
-  private int[] getAlpha(byte[] image){
-    int[] alpha = new int[image.length];
+  private int[] getAlpha(BufferedImage image){
+    int height = image.getHeight();
+    int width = image.getWidth();
+    int[] alpha = new int[height*width];
 
-    for (int i = 0; i < image.length; i++){
-      alpha[i] = ((image[i] >> 24) & 0xff);
+    // for (int i = 0; i < image.length; i++){
+    //   alpha[i] = ((image[i] >> 24) & 0xff);
+    // }
+    int counter = 0;
+    for (int i = 0; i < height; i++){
+      for (int j = 0; j < width; j++){
+        int pixel = image.getRGB(j,i);
+        alpha[counter++] = (pixel >> 24) & 0xff;
+      }
     }
 
     return alpha;
   }
 
-  private byte[] RGBtoImage(int[] RGB, int[] alpha){
-    byte[] image = new byte[RGB.length / 3];
+  private BufferedImage RGBtoImage(BufferedImage img, int height, int width,int[] RGB, int[] alpha){
+    // byte[] image = new byte[RGB.length / 3];
 
-    // for (int i = 0; i < RGB.length ; i += 3){
-    //   image[i/3] = (byte) ((alpha[i] << 24) | (RGB[i]<<16) | (RGB[i + 1]<<8) | RGB[i + 2]);
-    // }
+    int[] image = new int[height*width];
 
     int count = 0;
     for (int i = 0; i < image.length; i++ ){
       // System.out.println(((alpha[i] << 24) | (RGB[count]<<16) | (RGB[count += 1]<<8) | RGB[count += 1]));
-      image[i] = (byte) ((alpha[i] << 24) | (RGB[count]<<16) | (RGB[count += 1]<<8) | RGB[count += 1]);
+      image[i] = ((alpha[i] << 24) | (RGB[count]<<16) | (RGB[count += 1]<<8) | RGB[count += 1]);
       // if (((alpha[i] << 24) | (RGB[count]<<16) | (RGB[count += 1]<<8) | RGB[count += 1]) != image[i]){
       //   System.out.println("Here");
       // }
       count++;
     }
 
+    count = 0;
+    for (int i = 0; i < height; i++){
+      for (int j = 0; j < width; j++){
+        img.setRGB(j,i,image[count++]);
+      }
+    }
+
     // System.out.println()
     // System.out.println("RGBtoImage loop over");
-    return image;
+    return img;
   }
 
   /*
@@ -471,16 +642,23 @@ public class SudokuSteganography{
    *@param image Array of data, representing an image
    *@return Array of data which contains the hidden text
    */
-  private byte[] decode_text(byte[] image)
+  private byte[] decode_text(BufferedImage img)
   {
-    int length = 0;
-    int offset  = 32;
+    byte[] image = get_byte_data(img);
+    // int length = 0;
+    int height = img.getHeight();
+    int width = img.getWidth();
+    int offset  = (image.length) - (81*8);
     //loop through 32 bytes of data to determine text length
-    for(int i=0; i<32; ++i) //i=24 will also work, as only the 4th byte contains real data
-    {
-      // System.out.println(i);
-      length = (length << 1) | (image[i] & 1);
-    }
+    // for(int i=0; i<32; ++i) //i=24 will also work, as only the 4th byte contains real data
+    // {
+    //   // System.out.println(i);
+    //   length = (length << 1) | (image[i] & 1);
+    // }
+    // System.out.println(length);
+
+
+
 
     int[] result = new int[81];
 
@@ -496,26 +674,6 @@ public class SudokuSteganography{
       }
     }
 
-    //Code to revert encoding
-
-    // for(int i=0; i<addition.length; ++i)
-    // {
-    //   //loop through the 8 bits of each byte
-    //   int add = addition[i];
-    //   for(int bit=7; bit>=0; --bit, ++offset) //ensure the new offset value carries on through both loops
-    //   {
-    //     //assign an integer to b, shifted by bit spaces AND 1
-    //     //a single bit of the current byte
-    //     int b = (add >>> bit) & 1;
-    //     //assign the bit by taking: [(previous byte value) AND 0xfe] OR bit to add
-    //     //changes the last bit of the byte in the image to be the bit of addition
-    //     image[offset] = (byte)((image[offset] & 0xFE) | b );
-    //   }
-    // }
-
-    //
-
-
     int[][] grid = new int[9][9];
 
     int count = 0;
@@ -527,8 +685,6 @@ public class SudokuSteganography{
 
     }
 
-    // System.out.println("Done");
-
     // for (int i = 0; i<9; i++)
     // {
     //     for (int j = 0; j<9; j++)
@@ -536,46 +692,74 @@ public class SudokuSteganography{
     //     System.out.println();
     // }
     // System.out.println();
-    // System.out.println("Need to return something");
 
-    return decodeMsg(image,grid,length);
+    int[] RGB = imageToRGB(img);
+    int counter = 0;
+    int Si;
+
+    String lengthBits = "";
+
+    int[] Sk = new int[15];
+    // int SkLength = (((length*8) + 0) /3);
+    for (int i = 0; i < Sk.length; i++){
+      int pix = RGB[counter++] % 9;
+      int piy = RGB[counter++] % 9;
+      Sk[i] = grid[piy][pix];
+      // System.out.println(Sk[i]);
+      Si = grid[piy][pix];
+      lengthBits += convertToBin(Si).substring(5,8);
+    }
+
+    //May need to change this
+    int length = Integer.parseInt(lengthBits,2);
+
+    // System.out.println(length);
+
+    return decodeMsg(img,grid,length);
   }
 
 
 
-  private byte[] decodeMsg(byte[] image, int[][] grid, int length){
+  private byte[] decodeMsg(BufferedImage img, int[][] grid, int length){
 
-    int[] RGB = imageToRGB(image);
-    // int[] Sk = new int[length];
-    int counter = 0;
+    // byte[] image = get_byte_data(img);
+
+
+
+    int[] RGB = imageToRGB(img);
+    int counter = 30;
     int Si;
+
+
     String result = "";
-    System.out.println("Message is being decoded here");
-    for (int i = 0; i < length; i++){
+
+    int bitCount = (length * 8) % 3;
+    int zeroOffset = bitCount == 0 ? 0 : 3 - bitCount;
+
+    // System.out.println("Here: " + (((length*8) + zeroOffset) /3));
+    int SkLength = (((length*8) + zeroOffset) /3);
+    int[] Sk = new int[SkLength];
+    for (int i = 0; i < SkLength; i++){
       int pix = RGB[counter++] % 9;
       int piy = RGB[counter++] % 9;
-      // Sk[i] = grid[piy][pix];
+      Sk[i] = grid[piy][pix];
       Si = grid[piy][pix];
-      result += convertToBin(Si);
+      result += convertToBin(Si).substring(5,8);
     }
 
-    System.out.println(result);
-    int overflow = result.length() - (length * 8);
-
-    result = result.substring(0, result.length() - overflow);
-
-    System.out.println(result.length() / 8);
+    result = result.substring(0, result.length() - zeroOffset);
 
     byte[] output = new byte[length];
     counter = 0;
     for (int i = 0; i < length; i++){
       // output[i] = Byte.parseByte(result.substring(counter, counter + 8));
       int value = Integer.parseInt(result.substring(counter, counter + 8),2);
-      System.out.println(value);
+      // System.out.println(value);
       output[i] = (byte) value;
-      System.out.println(output[i]);
+      // System.out.println(output[i]);
       counter += 8;
     }
+    // System.out.println(Arrays.toString(output));
 
     return output;
 
@@ -594,5 +778,18 @@ public class SudokuSteganography{
       }
     }
     return -1;
+  }
+
+  private byte[] returnOneDimension(int[][] grid){
+    byte[] output = new byte[81];
+    int count = 0;
+    for (int i = 0; i < 9; i++){
+      for (int j = 0; j < 9; j++){
+
+        output[count++] = (byte) grid[i][j];
+
+      }
+    }
+    return output;
   }
 }
