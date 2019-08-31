@@ -31,7 +31,7 @@ public class ZipFileTest {
 			// addToZipFile(file2Name, zos);
 			// addToZipFile(file3Name, zos);
 
-      byte[] originalContentBytes = readBytesFromAFile(new File("Archive 2.zip"));
+      byte[] originalContentBytes = readBytesFromAFile(new File("atest copy.zip"));
 
       // File.WriteAllBytes("random.zip", originalContentBytes);
 			// System.out.println(Arrays.toString(originalContentBytes));
@@ -68,9 +68,6 @@ public class ZipFileTest {
 
 			    String entryName = entry.getName();
 					System.out.println(entryName);
-					if(entryName.contains("__MACOSX/")){
-						continue;
-					}
 					FileOutputStream out = null;
 					// if (entryName.equals("random1.txt")){
 					// 	out = new FileOutputStream("test1.txt");

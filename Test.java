@@ -1,71 +1,9 @@
-// public class Test {
-//     public static String toBinary(String text) {
-//         StringBuilder sb = new StringBuilder();
+// // /*
+// //  *@author Ashutosh Patra
+// //  *@version 1.0
+// //  */
 //
-//         for (char character : text.toCharArray()) {
-//             sb.append(Integer.toBinaryString(character));
-//         }
-//
-//         return sb.toString();
-//
-//     }
-//
-//     public static String toBase9(int number){
-//       String baseNine = "";
-//       int quotient = number;
-//       while (quotient > 9){
-//         baseNine += (quotient % 9);
-//         // System.out.println(quotient + " remainder " + (quotient % 9));
-//         // System.out.println()
-//         quotient /= 9;
-//
-//         if (quotient < 9){
-//           baseNine += quotient;
-//         }
-//       }
-//
-//       StringBuilder sb = new StringBuilder(baseNine).reverse();
-//
-//       return sb.toString();
-//     }
-//
-//     public static void main(String[] args){
-//       // System.out.println(toBinary("Hello"));
-//       // String test = "Hello";
-//       //
-//       // byte[] array = {123,43,123,32};
-//       //
-//       // for (int i = 0; i < array.length; i++){
-//       //   System.out.println(toBase9(array[i]));
-//       // }
-//
-//       // String bits = "011010101010101010101010";
-//       //
-//       // int counter = 0;
-//       // for (int i = 0; i < (bits.length() / 8); i++){
-//       //   System.out.println(bits.substring(counter, counter + 8));
-//       //   counter += 8;
-//       // }
-//
-//       int[] array = {1,2,3};
-//
-//       int count = 0;
-//
-//       System.out.println("" + array[count] + "+" + array[count++]);
-//       System.out.println(count);
-//       //
-//       // System.out.println(test.length());
-//       // System.out.println(test.getBytes().length);
-//       // System.out.println(toBase9(2572));
-//
-//     }
-// }
-/*
- *@author Ashutosh Patra
- *@version 1.0
- */
-
-import java.io.File;
+// import java.io.File;
 
 import java.awt.Point;
 import java.awt.Graphics2D;
@@ -78,6 +16,12 @@ import javax.swing.JOptionPane;
 
 import java.util.Arrays;
 
+import java.io.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipInputStream;
+// import java.util.Arrays;
+
 
 public class Test{
 
@@ -88,25 +32,25 @@ public class Test{
   public static void main(String[] args){
 
     Test model = new Test();
-    if (model.encode("testFiles","googleLogo","png","output","Hello World this is me, ya boi Tosh asoidasdjasiodj!")){
+    if (model.encode("testFiles","googleLogo","png","output","Archive.zip")){
       System.out.println("Success");
     }
     else{
       System.out.println("Fail");
     }
 
-    System.out.println(model.decode("testFiles","output"));
+    model.decode("testFiles","output");
 
   }
 
-  public boolean encode(String path, String original, String ext1, String stegan, String message)
+  public boolean encode(String path, String original, String ext1, String stegan, String zipFileName)
   {
     String file_name = image_path(path,original,ext1);
     BufferedImage image_orig	= getImage(file_name);
 
     //user space is not necessary for Encrypting
     BufferedImage image = user_space(image_orig);
-    image = add_text(image,message);
+    image = add_text(image,zipFileName);
 
     return(setImage(image,new File(image_path(path,stegan,"png")),"png"));
   }
@@ -125,8 +69,34 @@ public class Test{
       //user space is necessary for decrypting
       BufferedImage image  = user_space(getImage(image_path(path,name,"png")));
       decode = decode_text(image);
+      ZipInputStream zipStream = new ZipInputStream(new ByteArrayInputStream(decode));
+			ZipEntry entry = null;
+			// int	counter = 0;
+			while ((entry = zipStream.getNextEntry()) != null) {
+
+			    String entryName = entry.getName();
+					System.out.println(entryName);
+          if(entryName.contains("__MACOSX/")){
+						continue;
+					}
+					FileOutputStream out = null;
+
+					out = new FileOutputStream(entryName);
+
+					// counter++;
+			    byte[] byteBuff = new byte[4096];
+			    int bytesRead = 0;
+			    while ((bytesRead = zipStream.read(byteBuff)) != -1)
+			    {
+			        out.write(byteBuff, 0, bytesRead);
+			    }
+
+			    out.close();
+			    zipStream.closeEntry();
+			}
+			zipStream.close();
       // decode = decode_text(get_byte_data(image));
-      // System.out.println("decode over");
+      System.out.println("decode over");
       return(new String(decode));
     }
     catch(Exception e)
@@ -170,6 +140,7 @@ public class Test{
     }
     catch(Exception ex)
     {
+      System.out.println("Here");
       JOptionPane.showMessageDialog(null,
         "Image could not be read!","Error",JOptionPane.ERROR_MESSAGE);
     }
@@ -205,11 +176,12 @@ public class Test{
    *@param text	 The text to hide in the image
    *@return Returns the image with the text embedded in it
    */
-  private BufferedImage add_text(BufferedImage image, String text)
+  private BufferedImage add_text(BufferedImage image, String zipFileName)
   {
     //convert all items to byte arrays: image, message, message length
     // byte img[] = get_byte_data(image);
-    byte msg[] = text.getBytes();
+    // System.out.println(text);
+    byte msg[] = readBytesFromAFile(new File(zipFileName));
     byte len[] = bit_conversion(msg.length);
     BufferedImage picture = image;
     try
@@ -240,12 +212,13 @@ public class Test{
       // sudokuEncoding(picture, msg, sudokuGrid);
       encode_text(img, returnOneDimension(sudokuGrid), (img.length) - (81*8)); //4 bytes of space for length: 4bytes*8bit = 32 bits
       lengthEncoding(picture, msg, sudokuGrid);
-      sudokuEncoding(picture, msg, sudokuGrid);
+      messageEncoding(picture, msg, sudokuGrid);
 
     }
     catch(Exception e)
     {
-      // System.out.println(e.toString());
+      System.out.println("Here");
+      System.out.println(e.toString());
       JOptionPane.showMessageDialog(null,
       "Target File cannot hold message!", "Error",JOptionPane.ERROR_MESSAGE);
     }
@@ -344,146 +317,48 @@ public class Test{
     String bits = "";
 
     // String lengthBits = convertToBin(addition.length);
-    for (int i = 0; i < 45-8; i++ ){
+    int lengthBits = Integer.toBinaryString(addition.length).length();
+    for (int i = 0; i < 45-lengthBits; i++ ){
+      System.out.println(i);
       bits += "0";
     }
-    bits += convertToBin(addition.length);
-    System.out.println(addition.length);
+    int length1 = bits.length();
+    System.out.println(length1);
+    bits += Integer.toBinaryString(addition.length);
+    // System.out.println(addition.length);
+    // System.out.println(bits);
+
+    System.out.println(bits.length());
     System.out.println(bits);
+    System.out.println(Integer.parseInt(bits,2));
+
+    System.out.println("The length is: " + addition.length);
 
     int[] Sk = new int[15];
     int bitCounter = 0;
     for (int i = 0; i < Sk.length; i++){
-      System.out.println(i);
+      // System.out.println(i);
       Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 4;
       Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 2;
       Sk[i] += Integer.parseInt(bits.charAt(bitCounter++)+"") * 1;
     }
 
-    System.out.println(Arrays.toString(Sk));
-    System.out.println(Arrays.toString(addition));
+    // System.out.println(Arrays.toString(Sk));
+    // System.out.println(Arrays.toString(addition));
 
     int[] RGB = imageToRGB(img);
     if (bits.length() > RGB.length * 4.5){
-      System.out.println("Exception is thrown");
+      // System.out.println("Exception is thrown");
       throw new IllegalArgumentException("File not long enough!");
     }
 
-    int RgbCounter = 0;
-    for (int j = 0; j < Sk.length; j++){
-      // System.out.println(j);
-      // System.out.println(j);
-      PixelPair first = new PixelPair(RGB[RgbCounter], RGB[RgbCounter + 1]);
-
-      int pix = first.getX() % 9;
-      int piy = first.getY() % 9;
-
-      int si = Sk[j];
-
-      int[] CEH = new int[9];
-      int[] CEV = new int[9];
-      int[][] CEB = new int[3][3];
-
-      for (int i = 0; i < 9; i++){
-        int pos = (i+4) % 9;
-        CEH[pos] = sudokuGrid[piy][pix];
-        pix = (pix+1) % 9;
-      }
-
-      for (int i = 0; i < 9; i++){
-        int pos = (i+4) % 9;
-        CEV[pos] = sudokuGrid[piy][pix];
-        piy = (piy+1) % 9;
-      }
-
-      int posx = 0;
-      int posy = 0;
-
-      piy = first.getY() % 9;
-
-      int firstX = first.getX() % 9;
-      int firstY = first.getY() % 9;
-
-      int py = (int) (piy / 3);
-      posy = (py * 3) % 3;
-
-      for (int i = 0; i < 3; i++){
-        pix = first.getX() % 9;
-        int px = (int) (pix / 3);
-        posx = (px * 3) % 3;
-
-        for (int k = 0; k < 3; k++){
-          CEB[posy][posx] = sudokuGrid[piy][pix];
-          posx++;
-          pix = (pix+1) % 9;
-
-        }
-        posy++;
-        piy = (piy+1) % 9;
-      }
-
-      int DH = linearSearch(CEH, si) - 4;
-      int DV = linearSearch(CEV, si) - 4;
-
-      int SQX = 0;
-      int SQY = 0;
-      int SQD = 0;
-      for (int i = 0; i < CEB.length; i++){
-        if (linearSearch(CEB[i],si) != -1){
-          SQX = linearSearch(CEB[i], si) + firstX - (pix % 3);
-          SQY = i + firstY - (piy%3);
-          SQD = (Math.abs(SQX) + Math.abs(SQY));
-          break;
-        }
-        if (i == CEB.length - 1){
-          SQD = Integer.MAX_VALUE;
-        }
-      }
-
-      if (Math.abs(DH) <= Math.abs(DV) && Math.abs(DH) <= Math.abs(SQD)){
-        first.setX(first.getX() + DH);
-      }
-      else if (Math.abs(DV) <= Math.abs(DH) && Math.abs(DV) <= Math.abs(SQD)){
-        first.setY(first.getY() + DV);
-      }
-      else{
-        first.setX(first.getX() + SQX);
-        first.setY(first.getY() + SQY);
-      }
-
-      // System.out.println(first.toString());
-
-      if (first.getX() < 0 || first.getX() > 255){
-        if (first.getX() < 0){
-          first.setX(first.getX() + 9);
-        }
-        else{
-          first.setX(first.getX() - 9);
-        }
-      }
-
-      if (first.getY() < 0 || first.getY() > 255){
-        if (first.getY() < 0){
-          first.setY(first.getY() + 9);
-        }
-        else{
-          first.setY(first.getY() - 9);
-        }
-      }
-
-      RGB[RgbCounter] = first.getX();
-      RGB[RgbCounter+1] = first.getY();
-
-      RgbCounter += 2;
-    }
-
-    // System.out.println("Embedding over");
+    RGB = sudokuEncoding(0,RGB,Sk, sudokuGrid);
 
     return RGBtoImage(img, height, width,RGB, getAlpha(img));
 
   }
 
-  private BufferedImage sudokuEncoding(BufferedImage img, byte[] addition, int[][] sudokuGrid){
+  private BufferedImage messageEncoding(BufferedImage img, byte[] addition, int[][] sudokuGrid){
 
     int height = img.getHeight();
     int width = img.getWidth();
@@ -519,118 +394,121 @@ public class Test{
       throw new IllegalArgumentException("File not long enough!");
     }
 
-    int RgbCounter = 30;
-    for (int j = 0; j < Sk.length; j++){
-      // System.out.println(j);
-      PixelPair first = new PixelPair(RGB[RgbCounter], RGB[RgbCounter + 1]);
-
-      int pix = first.getX() % 9;
-      int piy = first.getY() % 9;
-
-      int si = Sk[j];
-
-      int[] CEH = new int[9];
-      int[] CEV = new int[9];
-      int[][] CEB = new int[3][3];
-
-      for (int i = 0; i < 9; i++){
-        int pos = (i+4) % 9;
-        CEH[pos] = sudokuGrid[piy][pix];
-        pix = (pix+1) % 9;
-      }
-
-      for (int i = 0; i < 9; i++){
-        int pos = (i+4) % 9;
-        CEV[pos] = sudokuGrid[piy][pix];
-        piy = (piy+1) % 9;
-      }
-
-      int posx = 0;
-      int posy = 0;
-
-      piy = first.getY() % 9;
-
-      int firstX = first.getX() % 9;
-      int firstY = first.getY() % 9;
-
-      int py = (int) (piy / 3);
-      posy = (py * 3) % 3;
-
-      for (int i = 0; i < 3; i++){
-        pix = first.getX() % 9;
-        int px = (int) (pix / 3);
-        posx = (px * 3) % 3;
-
-        for (int k = 0; k < 3; k++){
-          CEB[posy][posx] = sudokuGrid[piy][pix];
-          posx++;
-          pix = (pix+1) % 9;
-
-        }
-        posy++;
-        piy = (piy+1) % 9;
-      }
-
-      int DH = linearSearch(CEH, si) - 4;
-      int DV = linearSearch(CEV, si) - 4;
-
-      int SQX = 0;
-      int SQY = 0;
-      int SQD = 0;
-      for (int i = 0; i < CEB.length; i++){
-        if (linearSearch(CEB[i],si) != -1){
-          SQX = linearSearch(CEB[i], si) + firstX - (pix % 3);
-          SQY = i + firstY - (piy%3);
-          SQD = (Math.abs(SQX) + Math.abs(SQY));
-          break;
-        }
-        if (i == CEB.length - 1){
-          SQD = Integer.MAX_VALUE;
-        }
-      }
-
-      if (Math.abs(DH) <= Math.abs(DV) && Math.abs(DH) <= Math.abs(SQD)){
-        first.setX(first.getX() + DH);
-      }
-      else if (Math.abs(DV) <= Math.abs(DH) && Math.abs(DV) <= Math.abs(SQD)){
-        first.setY(first.getY() + DV);
-      }
-      else{
-        first.setX(first.getX() + SQX);
-        first.setY(first.getY() + SQY);
-      }
-
-      // System.out.println(first.toString());
-
-      if (first.getX() < 0 || first.getX() > 255){
-        if (first.getX() < 0){
-          first.setX(first.getX() + 9);
-        }
-        else{
-          first.setX(first.getX() - 9);
-        }
-      }
-
-      if (first.getY() < 0 || first.getY() > 255){
-        if (first.getY() < 0){
-          first.setY(first.getY() + 9);
-        }
-        else{
-          first.setY(first.getY() - 9);
-        }
-      }
-
-      RGB[RgbCounter] = first.getX();
-      RGB[RgbCounter+1] = first.getY();
-
-      RgbCounter += 2;
-    }
-
-    // System.out.println("Embedding over");
+    RGB = sudokuEncoding(30,RGB,Sk, sudokuGrid);
 
     return RGBtoImage(img, height, width,RGB, getAlpha(img));
 
   }
+
+    private int[] sudokuEncoding(int start, int[] RGB, int[] Sk, int[][] sudokuGrid){
+      int RgbCounter = start;
+      for (int j = 0; j < Sk.length; j++){
+        // System.out.println(j);
+        PixelPair first = new PixelPair(RGB[RgbCounter], RGB[RgbCounter + 1]);
+
+        int pix = first.getX() % 9;
+        int piy = first.getY() % 9;
+
+        int si = Sk[j];
+
+        int[] CEH = new int[9];
+        int[] CEV = new int[9];
+        int[][] CEB = new int[3][3];
+
+        for (int i = 0; i < 9; i++){
+          int pos = (i+4) % 9;
+          CEH[pos] = sudokuGrid[piy][pix];
+          pix = (pix+1) % 9;
+        }
+
+        for (int i = 0; i < 9; i++){
+          int pos = (i+4) % 9;
+          CEV[pos] = sudokuGrid[piy][pix];
+          piy = (piy+1) % 9;
+        }
+
+        int posx = 0;
+        int posy = 0;
+
+        piy = first.getY() % 9;
+
+        int firstX = first.getX() % 9;
+        int firstY = first.getY() % 9;
+
+        int py = (int) (piy / 3);
+        posy = (py * 3) % 3;
+
+        for (int i = 0; i < 3; i++){
+          pix = first.getX() % 9;
+          int px = (int) (pix / 3);
+          posx = (px * 3) % 3;
+
+          for (int k = 0; k < 3; k++){
+            CEB[posy][posx] = sudokuGrid[piy][pix];
+            posx++;
+            pix = (pix+1) % 9;
+
+          }
+          posy++;
+          piy = (piy+1) % 9;
+        }
+
+        int DH = linearSearch(CEH, si) - 4;
+        int DV = linearSearch(CEV, si) - 4;
+
+        int SQX = 0;
+        int SQY = 0;
+        int SQD = 0;
+        for (int i = 0; i < CEB.length; i++){
+          if (linearSearch(CEB[i],si) != -1){
+            SQX = linearSearch(CEB[i], si) + firstX - (pix % 3);
+            SQY = i + firstY - (piy%3);
+            SQD = (Math.abs(SQX) + Math.abs(SQY));
+            break;
+          }
+          if (i == CEB.length - 1){
+            SQD = Integer.MAX_VALUE;
+          }
+        }
+
+        if (Math.abs(DH) <= Math.abs(DV) && Math.abs(DH) <= Math.abs(SQD)){
+          first.setX(first.getX() + DH);
+        }
+        else if (Math.abs(DV) <= Math.abs(DH) && Math.abs(DV) <= Math.abs(SQD)){
+          first.setY(first.getY() + DV);
+        }
+        else{
+          first.setX(first.getX() + SQX);
+          first.setY(first.getY() + SQY);
+        }
+
+        // System.out.println(first.toString());
+
+        if (first.getX() < 0 || first.getX() > 255){
+          if (first.getX() < 0){
+            first.setX(first.getX() + 9);
+          }
+          else{
+            first.setX(first.getX() - 9);
+          }
+        }
+
+        if (first.getY() < 0 || first.getY() > 255){
+          if (first.getY() < 0){
+            first.setY(first.getY() + 9);
+          }
+          else{
+            first.setY(first.getY() - 9);
+          }
+        }
+
+        RGB[RgbCounter] = first.getX();
+        RGB[RgbCounter+1] = first.getY();
+
+        RgbCounter += 2;
+      }
+      return RGB;
+    }
 
   private int[] imageToRGB(BufferedImage image){
     // int[] imageRGB = new int[image.length * 3];
@@ -767,13 +645,15 @@ public class Test{
       int pix = RGB[counter++] % 9;
       int piy = RGB[counter++] % 9;
       Sk[i] = grid[piy][pix];
-      System.out.println(Sk[i]);
+      // System.out.println(Sk[i]);
       Si = grid[piy][pix];
       lengthBits += convertToBin(Si).substring(5,8);
     }
 
     //May need to change this
     int length = Integer.parseInt(lengthBits,2);
+
+    System.out.println(lengthBits);
 
     System.out.println(length);
 
@@ -821,7 +701,7 @@ public class Test{
       // System.out.println(output[i]);
       counter += 8;
     }
-    System.out.println(Arrays.toString(output));
+    // System.out.println(Arrays.toString(output));
 
     return output;
 
@@ -854,4 +734,39 @@ public class Test{
     }
     return output;
   }
+
+    private byte[] readBytesFromAFile(File file){
+      FileInputStream fis = null;
+      // Creating a byte array using the length of the file
+      // file.length returns long which is cast to int
+      byte[] bArray = new byte[(int) file.length()];
+      try{
+          fis = new FileInputStream(file);
+          fis.read(bArray);
+          fis.close();
+
+      }catch(IOException ioExp){
+          ioExp.printStackTrace();
+      }
+      return bArray;
+    }
+
+    private String toBase2(int number){
+      String baseNine = "";
+      int quotient = number;
+      while (quotient > 2){
+        baseNine += (quotient % 2);
+        // System.out.println(quotient + " remainder " + (quotient % 9));
+        // System.out.println()
+        quotient /= 2;
+
+        if (quotient < 2){
+          baseNine += quotient;
+        }
+      }
+
+      StringBuilder sb = new StringBuilder(baseNine).reverse();
+
+      return sb.toString();
+    }
 }
