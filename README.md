@@ -1,1 +1,1 @@
-# SudokuSteganography
+# Sudoku Steganography
