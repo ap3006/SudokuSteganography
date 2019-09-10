@@ -37,6 +37,9 @@ public class SudokuSteganography{
 
   }
 
+  /*
+   *
+   */
   public boolean encode(String path, String original, String ext1, String stegan, String message)
   {
     String file_name = image_path(path,original,ext1);
@@ -69,7 +72,7 @@ public class SudokuSteganography{
     }
     catch(Exception e)
     {
-      System.out.println("I am here");
+      // System.out.println("I am here");
       System.out.println(e.toString());
       // System.out.println()
       JOptionPane.showMessageDialog(null,
@@ -139,7 +142,8 @@ public class SudokuSteganography{
   }
 
   /*
-   *Handles the addition of text into an image
+   *Handles the addition of text into an image, and generates a random sudoku
+   *solution which will be used as a key.
    *@param image The image to add hidden text to
    *@param text	 The text to hide in the image
    *@return Returns the image with the text embedded in it
@@ -147,7 +151,6 @@ public class SudokuSteganography{
   private BufferedImage add_text(BufferedImage image, String text)
   {
     //convert all items to byte arrays: image, message, message length
-    // byte img[] = get_byte_data(image);
     System.out.println(text);
     byte msg[] = text.getBytes();
     byte len[] = bit_conversion(msg.length);
@@ -276,6 +279,15 @@ public class SudokuSteganography{
     return image;
   }
 
+  /*
+   *Encodes the length of the message to be hidden, using the "Sudoku" algorithm.
+   *@param img The image to get byte data from
+   *@param addition the byte array of the data to be embedded.
+   *@param sudokuGrid the two-dimensional array that represents the sudoku-solution
+   * that will be used as a key to embed data in the image.
+   *@return returns the resulting image after encoding the length of the message
+   *into the cover image.
+   */
   private BufferedImage lengthEncoding(BufferedImage img, byte[] addition, int[][] sudokuGrid){
 
     int height = img.getHeight();
@@ -315,6 +327,15 @@ public class SudokuSteganography{
 
   }
 
+  /*
+   *Encodes the the message to be hidden, using the "Sudoku" algorithm.
+   *@param img The image to get byte data from
+   *@param addition the byte array of the data to be embedded.
+   *@param sudokuGrid the two-dimensional array that represents the sudoku-solution
+   * that will be used as a key to embed data in the image.
+   *@return returns the resulting image after encoding the message
+   *into the cover image.
+   */
   private BufferedImage messageEncoding(BufferedImage img, byte[] addition, int[][] sudokuGrid){
 
     int height = img.getHeight();
@@ -357,6 +378,15 @@ public class SudokuSteganography{
 
   }
 
+    /*
+     * Returns the RGB values after the encoding algorithm with the sudoku solutions
+     * have been applied.
+     * @param start The byte position in the image, where the encoding is going to start
+     * @param RGB An array of RGB values of the image.
+     * @param Sk An array of base 9 digits of the secret message.
+     * @param sudokuGrid The sudoku solution which is going to be used as a key in the encoding process.
+     * @return Returns an array of RGB values after applying the encoding algorithm. 
+     */
     private int[] sudokuEncoding(int start, int[] RGB, int[] Sk, int[][] sudokuGrid){
       int RgbCounter = start;
       for (int j = 0; j < Sk.length; j++){
@@ -439,8 +469,6 @@ public class SudokuSteganography{
           first.setY(first.getY() + SQY);
         }
 
-        // System.out.println(first.toString());
-
         if (first.getX() < 0 || first.getX() > 255){
           if (first.getX() < 0){
             first.setX(first.getX() + 9);
@@ -467,6 +495,11 @@ public class SudokuSteganography{
       return RGB;
     }
 
+  /*
+   * Returns an array of int corresponding to the RGB values in the inputted image.
+   * @param image This is the image object whose RGB values are going to be retrieved from.
+   * @return an array of RGB values
+   */
   private int[] imageToRGB(BufferedImage image){
     // int[] imageRGB = new int[image.length * 3];
     int height = image.getHeight();
@@ -488,6 +521,11 @@ public class SudokuSteganography{
 
   }
 
+  /*
+   * Returns an array of each pixel's corresponding alpha value.
+   * @param image This is the image object whose alpha values are going to be retrieved.
+   * @return An array of int values corresponding to alpha values is going to be returned.
+   */
   private int[] getAlpha(BufferedImage image){
     int height = image.getHeight();
     int width = image.getWidth();
@@ -507,6 +545,16 @@ public class SudokuSteganography{
     return alpha;
   }
 
+  /*
+   * Converts an array of RGB and alpha values and sets it to the image value that is being inputted and returns
+   * that image object.
+   * @param img The image object whose RGB and alpha values are going to be set.
+   * @param height Height of the image
+   * @param width Width of the image.
+   * @param RGB An array of RGB values
+   * @param alpha An array of alpha values
+   * @return A BufferedImage object which have newly set RGB and alpha values.
+   */
   private BufferedImage RGBtoImage(BufferedImage img, int height, int width,int[] RGB, int[] alpha){
     // byte[] image = new byte[RGB.length / 3];
 
@@ -529,8 +577,6 @@ public class SudokuSteganography{
       }
     }
 
-    // System.out.println()
-    // System.out.println("RGBtoImage loop over");
     return img;
   }
 
@@ -553,9 +599,6 @@ public class SudokuSteganography{
     //   length = (length << 1) | (image[i] & 1);
     // }
     // System.out.println(length);
-
-
-
 
     int[] result = new int[81];
 
@@ -607,7 +650,6 @@ public class SudokuSteganography{
       lengthBits += convertToBin(Si).substring(5,8);
     }
 
-    //May need to change this
     int length = Integer.parseInt(lengthBits,2);
 
     // System.out.println(length);
@@ -617,16 +659,20 @@ public class SudokuSteganography{
 
 
 
+  /*
+   * Decodes whatever message has been encoded onto the image, by using the "Sudoku" algorithm.
+   * @param img This is the image object which contains the encoded message.
+   * @param grid This is the sudoku solution, which will be used as a key in order to
+   * decode the message.
+   * @param length This is the length of the message that has been encoded.
+   */
   private byte[] decodeMsg(BufferedImage img, int[][] grid, int length){
 
     // byte[] image = get_byte_data(img);
 
-
-
     int[] RGB = imageToRGB(img);
     int counter = 30;
     int Si;
-
 
     String result = "";
 
@@ -662,11 +708,24 @@ public class SudokuSteganography{
 
   }
 
+  /*
+   *This returns a string of the binary representation of the inputted number.
+   *@param number The number whose binary value will be outputted as a string.
+   *@return a binary representation of the paramter (as a string).
+   */
   private String convertToBin(int number){
 		return String.format("%8s", Integer.toBinaryString(number & 0xFF)).replace(' ', '0');
 	}
 
 
+ /*
+  * This linearly searches through the array to find the value that is being searched
+  * for and the index of the element is returned, otherwise -1 is returned.
+  * @param array the array in which the value is being searched for.
+  * @param value the int value that we're looking for in the array.
+  * @return an int value indicating the position of the value in the array or -1 indicating
+  * the value is not present in the array at all.
+  */
   private int linearSearch(int[] array, int value){
 
     for (int i = 0; i < array.length; i++){
@@ -677,6 +736,14 @@ public class SudokuSteganography{
     return -1;
   }
 
+
+  /*
+   *Takes in a two dimensional array which corresponds to a sudoku grid and
+   *returns a concatantion of each row.
+   *@param grid This is the sudoku grid whose rows are being concatenated
+   *into a one dimensional array.
+   *@return a one dimensional byte array.
+   */
   private byte[] returnOneDimension(int[][] grid){
     byte[] output = new byte[81];
     int count = 0;
@@ -690,8 +757,3 @@ public class SudokuSteganography{
     return output;
   }
 }
-
-/*
- *@author Ashutosh Patra
- *@version 1.0
- */

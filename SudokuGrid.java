@@ -12,6 +12,7 @@ public class SudokuGrid {
 
     public SudokuGrid(){
       grid = new int[9][9];
+      // fillGrid();
     }
 
     public void fillGrid(){
@@ -73,8 +74,7 @@ public class SudokuGrid {
     }
 
     public void printGrid(){
-        for (int i = 0; i<9; i++)
-        {
+        for (int i = 0; i<9; i++){
             for (int j = 0; j<9; j++)
                 System.out.print(grid[i][j] + " ");
             System.out.println();
@@ -82,7 +82,17 @@ public class SudokuGrid {
         System.out.println();
     }
 
-    public byte[] returnOneDimension(){
+    public String toString(){
+      String output = "";
+      for (int i = 0; i < 9; i++){
+        for (int j = 0; j < 9; j++){
+          output += grid[i][j];
+        }
+      }
+      return output;
+    }
+
+    private byte[] returnOneDimension(){
       byte[] output = new byte[81];
       int count = 0;
       for (int i = 0; i < 9; i++){
@@ -95,29 +105,26 @@ public class SudokuGrid {
       return output;
     }
 
-    public boolean fillRemaining(int i, int j){
-        if (j>=9 && i<9-1)
-        {
+    private boolean fillRemaining(int i, int j){
+
+        if (j>=9 && i<9-1){
             i = i + 1;
             j = 0;
         }
+
         if (i>=9 && j>=9)
             return true;
 
-        if (i < 3)
-        {
+        if (i < 3){
             if (j < 3)
                 j = 3;
         }
-        else if (i < 6)
-        {
+        else if (i < 6){
             if (j==(int)(i/3)*3)
                 j =  j + 3;
         }
-        else
-        {
-            if (j == 6)
-            {
+        else{
+            if (j == 6){
                 i = i + 1;
                 j = 0;
                 if (i>=9)
@@ -125,10 +132,8 @@ public class SudokuGrid {
             }
         }
 
-        for (int num = 1; num<=9; num++)
-        {
-            if (CheckIfSafe(i, j, num))
-            {
+        for (int num = 1; num<=9; num++){
+            if (CheckIfSafe(i, j, num)){
                 grid[i][j] = num;
                 if (fillRemaining(i, j+1))
                     return true;
@@ -139,7 +144,7 @@ public class SudokuGrid {
         return false;
     }
 
-    public void subtractOne(){
+    private void subtractOne(){
       for (int i = 0; i < 9; i++){
         for (int j = 0; j < 9; j++){
           grid[i][j]--;
@@ -147,14 +152,18 @@ public class SudokuGrid {
       }
     }
 
-    public int[][] returnGrid(){
+    private int[][] returnGrid(){
       return grid;
     }
 
     public static void main(String args[]){
       SudokuGrid sudoku = new SudokuGrid();
       sudoku.fillGrid();
+      sudoku.subtractOne();
       sudoku.printGrid();
+
+      System.out.println(sudoku.toString());
+
     }
 
 
